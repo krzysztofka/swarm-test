@@ -1,0 +1,31 @@
+version: '3.1'
+services:
+  service-registry:
+    image: service-registry:latest
+    ports:
+      - 8761:8761
+
+  ping-service:
+    image: ping-service
+    depends_on:
+      - service-registry
+      - ping-service
+    environment:
+      - eureka.client.serviceUrl.defaultZone=http://service-registry:8761/eureka
+    ports:
+      - 8081:8081
+      
+  pong-service:
+    image: pong-service
+    depends_on:
+      - service-registry
+    environment:
+      - eureka.client.serviceUrl.defaultZone=http://service-registry:8761/eureka
+    deploy:
+        mode: replicated
+        replicas: 2
+
+networks:
+  default:
+    external:
+      name: springcloud-overlay
